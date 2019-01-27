@@ -38,7 +38,7 @@ def collide(gas):
     Parameters
     ----------
     gas : dict
-        Gas befor collisions
+        Gas before collisions
         
     Returns
     -------
@@ -67,7 +67,7 @@ def propagate(gas):
     Parameters
     ----------
     gas : dict
-        Gas befor propagation
+        Gas before propagation
         
     Returns
     -------

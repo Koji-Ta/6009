@@ -7,7 +7,9 @@
 #                      ["w"], [ ], ["w"],
 #                      ["w"], ["w","d"], ["w"] ] }
 
+# opposite gas states, for a wall opposite state is a wall
 opposite = {"l": "r", "r": "l", "u": "d", "d": "u", "w": "w"}
+# state turned by 90 degree, need for collisions compute
 turned = {"l": "u", "u": "r", "r": "d", "d": "l"}
 
 def step(gas):
@@ -72,4 +74,54 @@ def propagate(gas):
     dict
         Gas after propagation
     """
-    raise NotImplementedError
+    new_state = [[] for _ in range(gas["width"] * gas["height"])]
+    for i, cell in enumerate(gas["state"]):
+        for item in cell:
+            new_index = get_index(i, item, gas)
+            if 0 <= new_index < len(new_state):
+                new_state[new_index].append(item)
+    return {"width": gas["width"],
+            "height": gas["height"],
+            "state": new_state}
+
+
+def get_index(index, item, gas):
+    """
+    Return index of the item in new stat of the gas
+    
+    Parameters
+    ----------
+    index : int
+        Index of the item in the current gas state
+    item : str
+        Wall presents or particle direction
+    gas : dict
+        Current gas state
+        
+    Returns
+    -------
+    int
+        Index of wall or particle in next gas state
+    """
+    if item == "w":
+        new_index = index
+    elif item == 'l':
+        # left boundary check
+        if index % gas["width"] == 0:
+            new_index = -1
+        else:
+            new_index = index - 1
+    elif item == "r":
+        # right boundary check
+        if index % gas["width"] == gas["width"] - 1:
+            new_index = -1
+        else:
+            new_index = index + 1
+    elif item == "u":
+        new_index = index - gas["width"]
+    elif item == "d":
+        new_index = index + gas["width"]
+    else:
+        raise ValueError("Unknown cell state")
+    # valid inexes in range from 0 to gas["width"] * gas["height"]
+    return new_index

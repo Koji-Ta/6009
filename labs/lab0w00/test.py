@@ -137,7 +137,7 @@ class TestGas(unittest.TestCase):
         input = {"width": 3,
                  "state": [['l'], ['r'], ['u'],
                            ['w', 'l', 'u'], ['u', 'd'], ['u', 'l', 'd'],
-                           ['l', 'r'], ['u'], ['l']],
+                           ['l', 'r'], ['u'], ['l', "r"]],
                  "height": 3}
         result = lab.propagate(input)
         expect = {"width": 3,

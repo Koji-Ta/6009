@@ -100,6 +100,53 @@ class TestGas(unittest.TestCase):
                 result = lab.step(input)
                 self.check_result(result, expect)
 
+    def test_my_01(self):
+        # test step()
+        input = {"width": 3,
+                 "state": [["w"], [], [],
+                           ["w", "l"], ['l', 'r'], [],
+                           [], ["d"], []],
+                 "height": 3}
+        result = lab.step(input)
+        expect = {"width": 3,
+                  "state": [["w"], ["u"], [],
+                            ['w'], ["r"], [],
+                            [], ["d"], []],
+                  "height": 3}
+        self.check_result(result, expect)
+
+    def test_my_02(self):
+        # test collide()
+        input = {"width": 3,
+                 "state": [['w', 'd'], ['w', 'u'], ['w', 'l', 'r'],
+                           ['w'], ['u'], ['l', 'r'],
+                           ['w', 'l'], ['w', 'r'], ['u', 'd'],
+                           ['l', 'r', 'u', 'd'], ['d'], ['l', 'd', 'r']],
+                 "height": 4}
+        result = lab.collide(input)
+        expect = {"width": 3,
+                  "state": [['w', 'u'], ['w', 'd'], ['w', 'l', 'r'],
+                            ['w'], ['u'], ['u', 'd'],
+                            ['w', 'r'], ['w', 'l'], ['l', 'r'],
+                            ['l', 'r', 'u', 'd'], ['d'], ['l', 'd', 'r']],
+                  "height": 4}
+        self.check_result(result, expect)
+
+    def test_my_03(self):
+        # test propagate()
+        input = {"width": 3,
+                 "state": [['l'], ['r'], ['u'],
+                           ['w', 'l', 'u'], ['u', 'd'], ['u', 'l', 'd'],
+                           ['l', 'r'], ['u'], ['l']],
+                 "height": 3}
+        result = lab.propagate(input)
+        expect = {"width": 3,
+                  "state": [['u'], ['u'], ['r', 'u'],
+                            [], ['u'], [],
+                            [], ['d', 'r', 'l'], ['d']],
+                  "height": 3}
+        self.check_result(result, expect)
+
     def load_case(self, case):
         # Read input
         with open("cases/"+case+'.in', 'r') as f:

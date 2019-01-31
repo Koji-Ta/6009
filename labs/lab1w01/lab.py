@@ -22,7 +22,19 @@ class Image:
 
     def get_pixel(self, x, y):
         """Get value of the pixel with coordinates (x, y)"""
+        # Check that coordinates are in bounds
+        assert 0 <= x < self.width and 0 <= y < self.height
         return self.pixels[self._get_index(x, y)]
+
+    def get_pixel_alt(self, x, y):
+        """
+        Get value of the pixel whih coordinates (x, y)
+        
+        If coordinates are out of bounds, set coordinate to min or max bound
+        """
+        x = min(self.width-1, max(0, x))
+        y = min(self.height-1, max(0, y))
+        return self.get_pixel(x, y)
 
     def set_pixel(self, x, y, c):
         """Set pixel value with coordinates (x, y) to c"""
@@ -44,6 +56,32 @@ class Image:
         """
         return self.apply_per_pixel(lambda c: 255-c)
 
+    def clip(self):
+        """Create image with pixels values are integer and in [0..255]"""
+        result = Image.new(self.width, self.height)
+        result.pixels = [min(255, max(0, round(c))) for c in self.pixels]
+        return result
+
+    def correlate(self, kernel):
+        """
+        Create image, that is result of correlation wih kernel
+        
+        Kernel size is n x n where n is odd
+        """
+        kernel_size = len(kernel)
+        kernel_shift = kernel_size // 2
+        result = Image.new(self.width, self.height)
+        for x in range(self.width):
+            for y in range(self.height):
+                shift_x = x - kernel_shift
+                shift_y = y - kernel_shift
+                color = 0
+                for dx in range(kernel_size):
+                    for dy in range(kernel_size):
+                        color += self.get_pixel_alt(shift_x+dx, shift_y+dy) * \
+                                 kernel[dy][dx]
+                result.set_pixel(x, y, color)
+        return result
 
     # Below this point are utilities for loading, saving, and displaying
     # images, as well as for testing.

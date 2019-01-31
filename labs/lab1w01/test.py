@@ -58,6 +58,104 @@ class TestInvert(unittest.TestCase):
                 self.assertEqual(result,  expected)
 
 
+class TestHelpers(unittest.TestCase):
+    def setUp(self):
+        self.im = lab.Image(3, 3, [-4, 7, 2.2, 267, -8, 12.4, 9, 32, 629.7])
+
+    def test_01(self):
+        # Test Up and Left of bound get_pixel_alt()
+        result = self.im.get_pixel_alt(-1, -2)
+        expected = -4
+        self.assertEqual(result, expected)
+
+    def test_02(self):
+        # Test Up of bound get_pixel_alt()
+        result = self.im.get_pixel_alt(1, -2)
+        expected = 7
+        self.assertEqual(result, expected)
+
+    def test_03(self):
+        # Test Up and Right of bound get_pixel_alt()
+        result = self.im.get_pixel_alt(4, -1)
+        expected = 2.2
+        self.assertEqual(result, expected)
+
+    def test_04(self):
+        # Test Left of bound get_pixel_alt()
+        result = self.im.get_pixel_alt(-2, 1)
+        expected = 267
+
+        self.assertEqual(result, expected)
+
+    def test_05(self):
+        # Test in bound get_pixel_alt()
+        result = self.im.get_pixel_alt(1, 1)
+        expected = -8
+        self.assertEqual(result, expected)
+
+    def test_06(self):
+        # Test Right of bound get_pixel_alt()
+        result = self.im.get_pixel_alt(5, 1)
+        expected = 12.4
+        self.assertEqual(result, expected)
+
+    def test_07(self):
+        # Test Down and Left of bound get_pixel_alt()
+        result = self.im.get_pixel_alt(-1, 4)
+        expected = 9
+        self.assertEqual(result, expected)
+
+    def test_08(self):
+        # Test Down of bound get_pixel_alt()
+        result = self.im.get_pixel_alt(1, 3)
+        expected = 32
+        self.assertEqual(result, expected)
+
+    def test_09(self):
+        # Test Down and Righn of bound get_pixel_alt()
+        result = self.im.get_pixel_alt(3, 3)
+        expected = 629.7
+        self.assertEqual(result, expected)
+    
+    def test_10(self):
+        # Test clip()
+        result = self.im.clip()
+        expected = lab.Image(3, 3, [0, 7, 2, 255, 0, 12, 9, 32, 255])
+        self.assertEqual(result, expected)
+
+    def test_11(self):
+        # Test correlate() with identity kernel
+        kernel = ((0, 0, 0),
+                  (0, 1, 0),
+                  (0, 0, 0))
+        im = lab.Image.load('test_images/centered_pixel.png')
+        result = im.correlate(kernel)
+        expected = lab.Image.load('test_results/centered_pixel_identity.png')
+        self.assertEqual(result, expected)
+
+    def test_12(self):
+        # Test correlate() with translation kernel
+        kernel = ((0, 0, 0, 0, 0),
+                  (0, 0, 0, 0, 0),
+                  (1, 0, 0, 0, 0),
+                  (0, 0, 0, 0, 0),
+                  (0, 0, 0, 0, 0))
+        im = lab.Image.load('test_images/centered_pixel.png')
+        result = im.correlate(kernel)
+        expected = lab.Image.load('test_results/centered_pixel_translation.png')
+        self.assertEqual(result, expected)
+
+    def test_13(self):
+        # Test correlate() with average kernel
+        kernel = ((0,   0.2, 0),
+                  (0.2, 0.2, 0.2),
+                  (0,   0.2, 0))
+        im = lab.Image.load('test_images/centered_pixel.png')
+        result = im.correlate(kernel)
+        expected = lab.Image.load('test_results/centered_pixel_average.png')
+        self.assertEqual(result, expected)
+
+
 class TestFilters(unittest.TestCase):
     def test_blur(self):
         for kernsize in (1, 3, 7):

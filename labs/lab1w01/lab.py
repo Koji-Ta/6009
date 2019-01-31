@@ -10,6 +10,12 @@ from PIL import Image as PILImage
 
 ## NO ADDITIONAL IMPORTS ALLOWED!
 
+def get_box_blur(n, total=1):
+    """Create box blur with size n x n"""
+    value = total / n ** 2
+    return [[value for _ in range(n)] for _ in range(n)]
+
+
 class Image:
     def __init__(self, width, height, pixels):
         self.width = width
@@ -81,6 +87,12 @@ class Image:
                         color += self.get_pixel_alt(shift_x+dx, shift_y+dy) * \
                                  kernel[dy][dx]
                 result.set_pixel(x, y, color)
+        return result
+
+    def blurred(self ,n):
+        """Create blurred image, where kernel has sise n x n"""
+        kernel = get_box_blur(n)
+        result = self.correlate(kernel).clip()
         return result
 
     # Below this point are utilities for loading, saving, and displaying

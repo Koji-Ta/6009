@@ -167,6 +167,24 @@ class TestFilters(unittest.TestCase):
                     expected = lab.Image.load(expfile)
                     self.assertEqual(result,  expected)
 
+    def test_blur_black(self):
+        for kernsize in (3, 7):
+            with self.subTest(k=kernsize):
+                im = lab.Image(6, 5, [0]*(6*5))
+                result = im.blurred(kernsize)
+                expected = lab.Image(6, 5, [0]*(6*5))
+                self.assertEqual(result, expected)
+
+    def test_blur_centered_pixel(self):
+        name = 'centered_pixel'
+        for kernsize in (5, 7):
+            with self.subTest(k=kernsize):
+                im = lab.Image.load(f'test_images/{name}.png')
+                result = im.blurred(kernsize)
+                expfile = os.path.join(TEST_DIRECTORY, 'test_results', f'{name}_blur_{kernsize:02}.png')
+                expected = lab.Image.load(expfile)
+                self.assertEqual(result, expected)
+
     def test_sharpen(self):
         for kernsize in (1, 3, 9):
             for fname in ('mushroom', 'twocats', 'chess'):

@@ -89,9 +89,19 @@ class Image:
                 result.set_pixel(x, y, color)
         return result
 
-    def blurred(self ,n):
-        """Create blurred image, where kernel has sise n x n"""
+    def blurred(self, n):
+        """Create blurred image, where kernel has size n x n"""
         kernel = get_box_blur(n)
+        result = self.correlate(kernel).clip()
+        return result
+
+    def sharpened(self, n):
+        """Create sharpen image, where kernel has size n x n"""
+        # create sharp kernel
+        kernel = get_box_blur(n, total=-1)
+        center = n // 2
+        kernel[center][center] += 2
+        # apply correlation with that kernel
         result = self.correlate(kernel).clip()
         return result
 

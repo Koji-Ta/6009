@@ -204,6 +204,12 @@ class TestFilters(unittest.TestCase):
                 expected = lab.Image.load(expfile)
                 self.assertEqual(result,  expected)
 
+    def test_edges_centered_pixel(self):
+        im = lab.Image.load('test_images/centered_pixel.png')
+        result = im.edges()
+        expected = lab.Image.load('test_results/centered_pixel_edges.png')
+        self.assertEqual(result, expected)
+
 
 if __name__ == '__main__':
     res = unittest.main(verbosity=3, exit=False)

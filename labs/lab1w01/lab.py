@@ -105,6 +105,25 @@ class Image:
         result = self.correlate(kernel).clip()
         return result
 
+    def edges(self):
+        """Create image, which edge detect by apply Sobel operator"""
+        result = Image.new(self.width, self.height)
+        # defined kernels for Sobel operator
+        kernel_x = ((-1, 0, 1),
+                    (-2, 0, 2),
+                    (-1, 0, 1))
+        kernel_y = ((-1, -2, -1),
+                    ( 0,  0,  0),
+                    ( 1,  2,  1))
+        # apply correlation whith these kernels
+        o_x = self.correlate(kernel_x)
+        o_y = self.correlate(kernel_y)
+        # implement Sobel operator
+        result.pixels = [(x ** 2 + y ** 2) ** 0.5
+                        for x, y in zip(o_x.pixels, o_y.pixels)]
+        result = result.clip()
+        return result
+
     # Below this point are utilities for loading, saving, and displaying
     # images, as well as for testing.
 

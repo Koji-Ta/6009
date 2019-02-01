@@ -124,6 +124,34 @@ class Image:
         result = result.clip()
         return result
 
+    def shrink(self, n=1):
+        """Create new image without n 'minimum energy' columns"""
+        if n >= self.width:
+            return Image(0, self.height, [])
+        result = Image(self.width, self.height, self.pixels[:])
+        for _ in range(n):
+            # create energy map for the image
+            energy_map = result.edges()
+            # find index of minimum energy column
+            index = energy_map.min_energy_column()
+            # delete this column from the image
+            result.pixels = [color for i, color in enumerate(result.pixels)
+                                   if i % result.width != index]
+            result.width -= 1
+        return result
+
+    def min_energy_column(self):
+        """Return index of minimum energy column"""
+        min_energy  = 255 * self.height
+        result = 0
+        for index in range(self.width):
+            energy = sum(color for i, color in enumerate(self.pixels)
+                               if i % self.width == index)
+            if energy < min_energy:
+                min_energy = energy
+                result = index
+        return result
+
     # Below this point are utilities for loading, saving, and displaying
     # images, as well as for testing.
 

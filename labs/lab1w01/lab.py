@@ -144,12 +144,13 @@ class Image:
         """Return index of minimum energy column"""
         min_energy  = 255 * self.height
         result = 0
-        for index in range(self.width):
-            energy = sum(color for i, color in enumerate(self.pixels)
-                               if i % self.width == index)
+        for x in range(self.width):
+            energy = 0
+            for y in range(self.height):
+                energy += self.get_pixel(x, y) 
             if energy < min_energy:
                 min_energy = energy
-                result = index
+                result = x
         return result
 
     # Below this point are utilities for loading, saving, and displaying

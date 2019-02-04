@@ -153,6 +153,57 @@ class Image:
                 result = x
         return result
 
+    def seam_carving(self, n=1):
+        """Create a new image without n 'minimum energy' path from top to down"""
+        result = Image(self.width, self.height, self.pixels[:])
+        # do repeatedly
+        for _ in range(n):
+            # create energy map for the image
+            map = result.edges()
+            # transform energy map to cumulative energy map
+            map.transform_map()
+            # get seam coordinates from cumulative energy map
+            path = map.get_min_path()
+            # delete the seam from the image
+            result.delete_path(path)
+        return result
+
+    def transform_map(self):
+        """Transform energy map to cumulative energy map"""
+        for y in range(1, self.height):
+            for x in range(self.width):
+                # take minimum cost path to one of the parent node
+                min_parent_cost = min(self.get_pixel_alt(x_parent, y-1)
+                                  for x_parent in (x-1, x, x+1))
+                # find total cost to node
+                min_cost = self.get_pixel(x, y) + min_parent_cost
+                # change value in map
+                self.set_pixel(x, y, min_cost)
+
+    def get_min_path(self):
+        """Return minimum cost path"""
+        path = []
+        # find leaf of path and add in to path
+        _, x_min = min((self.get_pixel(x, self.height-1), x)
+                        for x in range(self.width))
+        path.append((x_min, self.height-1))
+        # add other nodes
+        for y in reversed(range(self.height-1)):
+            x, _ = path[-1]
+            # parents x (consider bounds)
+            x_parents = (max(0, min(self.width-1, x_p)) for x_p in (x-1, x, x+1))
+            _, x_min = min((self.get_pixel(x_p, y), x_p) for x_p in x_parents)
+            path.append((x_min, y))
+        return path
+
+    def delete_path(self, path):
+        """Delete seam from image"""
+        seam_set = set(self._get_index(x, y) for x, y in path)
+        self.pixels = [pixel for i, pixel in enumerate(self.pixels)
+                             if i not in seam_set]
+        self.width -= 1
+
+
     # Below this point are utilities for loading, saving, and displaying
     # images, as well as for testing.
 

@@ -216,6 +216,18 @@ class TestFilters(unittest.TestCase):
         expected = lab.Image(4, 2, [7, 4, 255, 46, 12, 7, 0, 24])
         self.assertEqual(result, expected)
 
+    def test_seam_carving(self):
+        im =  lab.Image(4, 4, [128, 76, 39, 87,
+                                62, 212, 38, 97, 
+                                12, 99, 176, 18,
+                                250, 38, 95, 114])
+        result = im.seam_carving()
+        expected = lab.Image(3, 4, [76, 39, 87,
+                                    62, 38, 97,
+                                    12, 176, 18,
+                                    250, 38, 114])
+        self.assertEqual(result, expected)
+
 
 if __name__ == '__main__':
     res = unittest.main(verbosity=3, exit=False)

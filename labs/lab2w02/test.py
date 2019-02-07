@@ -15,6 +15,27 @@ class TestTiny(unittest.TestCase):
         with open(filename, 'r') as f:
             self.data = json.load(f)
 
+    def test_01(self):
+        # did_x_and_y_act_together() actors A and B played together, order is A, B
+        actor1 = 1532
+        actor2 = 4724
+        result = lab.did_x_and_y_act_together(self.data, actor1, actor2)
+        self.assertTrue(result)
+
+    def test_02(self):
+        # did_x_and_y_act_together() actors A and B played together, order is B, A
+        actor1 = 1532
+        actor2 = 4724
+        result = lab.did_x_and_y_act_together(self.data, actor2, actor1)
+        self.assertTrue(result)
+
+    def test_03(self):
+        # did_x_and_y_act_together() actors didn't play together
+        actor1 = 1532
+        actor2 = 46866
+        result = lab.did_x_and_y_act_together(self.data, actor1, actor2)
+        self.assertFalse(result)
+
 
 class TestActedTogether(unittest.TestCase):
     def setUp(self):

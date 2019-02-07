@@ -2,6 +2,8 @@
 
 import json
 
+BACON_NUMBER = 4724
+
 def did_x_and_y_act_together(data, actor_id_1, actor_id_2):
     """Do two actors play in the same move?"""
     for id_1, id_2, _ in data:
@@ -25,7 +27,6 @@ def get_actor_name(data, actor_id):
 
 def get_actors_with_bacon_number(data, n):
     """Return set of actor ids with Bacon number of n"""
-    BACON_NUMBER = 4724
     # if Bacon number is 0 return Bacon id
     if n == 0:
         return {BACON_NUMBER}
@@ -54,7 +55,26 @@ def get_actors_graph(data):
 
 
 def get_bacon_path(data, actor_id):
-    raise NotImplementedError("Implement me!")
+    """Create a list of actor ids detailing a Bacon path to actor_id"""
+    id_graph = get_actors_graph(data)
+    closed = set()
+    add_fringe = set()
+    # in fringe (id, path)
+    fringe = {(BACON_NUMBER, (BACON_NUMBER,))}
+    while not (len(fringe) == 0 and len(add_fringe) == 0):
+        if len(fringe) == 0:
+            fringe = add_fringe
+            add_fringe = set()
+        other_id, path = fringe.pop()
+        if other_id == actor_id:
+            return list(path)
+        if other_id not in closed:
+            closed.add(other_id)
+            for new_id in id_graph[other_id]:
+                new_path = path + (new_id,)
+                add_fringe.add((new_id, new_path))
+    return None
+
 
 def get_path(data, actor_id_1, actor_id_2):
     raise NotImplementedError("Implement me!")
@@ -66,9 +86,6 @@ if __name__ == '__main__':
     with open('resources/large.json') as f:
         largedb = json.load(f)
 
-    # additional code here will be run only when lab.py is invoked directly
-    # (not when imported from test.py), so this is a good place to put code
-    # used, for example, to generate the results for the online questions.
     with open('resources/names.json') as f:
         names = json.load(f)
 
@@ -90,3 +107,9 @@ if __name__ == '__main__':
         print(f'Set of actors with Bacon number {bacon_number} in the {namedb}.json:')
         print(', '.join(get_actor_name(names, actor_id)
             for actor_id in get_actors_with_bacon_number(db[namedb], bacon_number)))
+    print()
+    print('Bacon path')
+    for actor in ('Karen Allen', 'Si Jenks', 'Iva Ilakovac'):
+        print(f'Path of actors from Kevin Vacon to {actor} in large.json:')
+        print(', '.join(get_actor_name(names, actor_id)
+            for actor_id in get_bacon_path(largedb, get_actor_id(names, actor))))

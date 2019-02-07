@@ -45,6 +45,12 @@ class TestTiny(unittest.TestCase):
                 r, e = data
                 self.assertEqual(r, e)
 
+    def test_05(self):
+        # test get_bacon_path()
+        result = lab.get_bacon_path(self.data, 46866)
+        expected = [4724, 2876, 1640, 46866]
+        self.assertEqual(result, expected)
+
 
 class TestActedTogether(unittest.TestCase):
     def setUp(self):

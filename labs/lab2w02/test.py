@@ -36,6 +36,15 @@ class TestTiny(unittest.TestCase):
         result = lab.did_x_and_y_act_together(self.data, actor1, actor2)
         self.assertFalse(result)
 
+    def test_04(self):
+        # test get_actors_with_bacon_number()
+        results = [lab.get_actors_with_bacon_number(self.data, i) for i in range(5)]
+        expected = [{4724}, {1532, 2876}, {1640}, {46866}, set()]
+        for i, data in enumerate(zip(results, expected)):
+            with self.subTest(b = i+1):
+                r, e = data
+                self.assertEqual(r, e)
+
 
 class TestActedTogether(unittest.TestCase):
     def setUp(self):

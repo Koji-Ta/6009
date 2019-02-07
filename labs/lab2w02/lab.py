@@ -56,17 +56,22 @@ def get_actors_graph(data):
 
 def get_bacon_path(data, actor_id):
     """Create a list of actor ids detailing a Bacon path to actor_id"""
+    return get_path(data, BACON_NUMBER, actor_id)
+
+
+def get_path(data, actor_id_1, actor_id_2):
+    """Create a list of actor ids detailing a path from actor_id_1 to actor_id_2"""
     id_graph = get_actors_graph(data)
     closed = set()
     add_fringe = set()
     # in fringe (id, path)
-    fringe = {(BACON_NUMBER, (BACON_NUMBER,))}
+    fringe = {(actor_id_1, (actor_id_1,))}
     while not (len(fringe) == 0 and len(add_fringe) == 0):
         if len(fringe) == 0:
             fringe = add_fringe
             add_fringe = set()
         other_id, path = fringe.pop()
-        if other_id == actor_id:
+        if other_id == actor_id_2:
             return list(path)
         if other_id not in closed:
             closed.add(other_id)
@@ -75,9 +80,6 @@ def get_bacon_path(data, actor_id):
                 add_fringe.add((new_id, new_path))
     return None
 
-
-def get_path(data, actor_id_1, actor_id_2):
-    raise NotImplementedError("Implement me!")
 
 if __name__ == '__main__':
     with open('resources/small.json') as f:
@@ -108,8 +110,17 @@ if __name__ == '__main__':
         print(', '.join(get_actor_name(names, actor_id)
             for actor_id in get_actors_with_bacon_number(db[namedb], bacon_number)))
     print()
-    print('Bacon path')
+    print('Bacon Path')
     for actor in ('Karen Allen', 'Si Jenks', 'Iva Ilakovac'):
         print(f'Path of actors from Kevin Vacon to {actor} in large.json:')
         print(', '.join(get_actor_name(names, actor_id)
             for actor_id in get_bacon_path(largedb, get_actor_id(names, actor))))
+    print()
+    print('Arbitrary Path')
+    for actor_1, actor_2 in (('Richard Pierson', 'Anton Radacic'),
+                                   ('Lam Yi-Wa', 'Emily Longstreth')):
+        print(f'Path of actors from {actor_1} to {actor_2} in large.json:')
+        print(', '.join(get_actor_name(names, actor_id)
+            for actor_id in get_path(largedb,
+                                     get_actor_id(names, actor_1),
+                                     get_actor_id(names, actor_2))))

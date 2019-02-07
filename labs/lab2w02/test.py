@@ -51,6 +51,12 @@ class TestTiny(unittest.TestCase):
         expected = [4724, 2876, 1640, 46866]
         self.assertEqual(result, expected)
 
+    def test_06(self):
+        # test get_path()
+        result = lab.get_path(self.data, 2876, 46866)
+        expected = [2876, 1640, 46866]
+        self.assertEqual(result, expected)
+
 
 class TestActedTogether(unittest.TestCase):
     def setUp(self):

@@ -233,8 +233,14 @@ class MinesGame:
         >>> g.render(True)
         [['.', '3', '1', ' '], ['.', '.', '1', ' ']]
         """
-        raise NotImplementedError
-
+        rep = [[' ' if cell == 0 else str(cell) for cell in row]
+                                                for row in self.board]
+        if not xray:
+            for r in range(self.dimensions[0]):
+                for c in range(self.dimensions[1]):
+                    if not self.mask[r][c]:
+                        rep[r][c] = '_'
+        return rep
 
     def render_ascii(self, xray=False):
         """Render a game as ASCII art.
@@ -259,8 +265,8 @@ class MinesGame:
         .31_
         __1_
         """
-        raise NotImplementedError
-
+        rep = self.render(xray)
+        return '\n'.join(''.join(row) for row in rep)
 
     @classmethod
     def from_dict(cls, d):

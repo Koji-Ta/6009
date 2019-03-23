@@ -205,7 +205,143 @@ class TestIntegration(unittest.TestCase):
 
 
 class TestNewTests(unittest.TestCase):
-    pass
+    def setUp(self):
+        self.game = lab.MinesGame(4, 3, [(0, 0), (2, 2)])
+
+    def test_01(self):
+        # test mask implementation
+        self.game.dig(1, 1)
+        result = self.game.render()
+        expected = [['_', '_', '_'],
+                    ['_', '2', '_'],
+                    ['_', '_', '_'],
+                    ['_', '_', '_']]
+        self.assertEqual(result, expected)
+
+    def test_02(self):
+        # test board implementation
+        self.game.dig(1, 2)
+        result = self.game.render()
+        expected = [['_', '_', '_'],
+                    ['_', '_', '1'],
+                    ['_', '_', '_'],
+                    ['_', '_', '_']]
+        self.assertEqual(result, expected)
+
+    def test_03(self):
+        # test dig() if state is 'victory'
+        game = game_from_dict({'dimensions': [2, 2],
+                               'state': 'victory',
+                               'mask': [[True, True],
+                                        [False, True]],
+                               'board': [[1,   1],
+                                         ['.', 1]]})
+        result = game.dig(1, 0)
+        expected = 0
+        state = 'victory'
+        view = [['1', '1'],
+                ['_', '1']]
+        self.assertEqual(result, expected)
+        self.assertEqual(game.state, state)
+        self.assertEqual(game.render(), view)
+
+    def test_04(self):
+        # test dig() if state is 'defeat'
+        game = game_from_dict({'dimensions': [2, 2],
+                               'state': 'defeat',
+                               'mask': [[True, False],
+                                        [True, False]],
+                               'board': [[1,   1],
+                                         ['.', 1]]})
+        result = game.dig(0, 1)
+        expected = 0
+        state = 'defeat'
+        view = [['1', '_'],
+                ['.', '_']]
+        self.assertEqual(result, expected)
+        self.assertEqual(game.state, state)
+        self.assertEqual(game.render(), view)
+
+    def test_05(self):
+        # test dig() if open a bomb
+        game = game_from_dict({'dimensions': [2, 2],
+                               'state': 'ongoing',
+                               'mask': [[False, True],
+                                        [False, True]],
+                               'board': [[1,   1],
+                                         ['.', 1]]})
+        result = game.dig(1, 0)
+        expected = 1
+        state = 'defeat'
+        view = [['_', '1'],
+                ['.', '1']]
+        self.assertEqual(result, expected)
+        self.assertEqual(game.state, state)
+        self.assertEqual(game.render(), view)
+
+    def test_06(self):
+        # test dig() if open 1 cell
+        game = game_from_dict({'dimensions': [2, 2],
+                               'state': 'ongoing',
+                               'mask': [[False, False],
+                                        [False, True]],
+                               'board': [[1,   1],
+                                         ['.', 1]]})
+        result = game.dig(0, 1)
+        expected = 1
+        state = 'ongoing'
+        view = [['_', '1'],
+                ['_', '1']]
+        self.assertEqual(result, expected)
+        self.assertEqual(game.state, state)
+        self.assertEqual(game.render(), view)
+
+    def test_07(self):
+        # test dig() if open some cells
+        game = lab.MinesGame(5,  5, [(0, 4), (3, 1)])
+        result = game.dig(2, 3)
+        expected = 20
+        state = 'ongoing'
+        view = [[' ', ' ', ' ', '1', '_'],
+                [' ', ' ', ' ', '1', '1'],
+                ['1', '1', '1', ' ', ' '],
+                ['_', '_', '1', ' ', ' '],
+                ['_', '_', '1', ' ', ' ']]
+        self.assertEqual(result, expected)
+        self.assertEqual(game.state, state)
+        self.assertEqual(game.render(), view)
+
+    def test_08(self):
+        # test dig() if open a cell and victory
+        game = lab.MinesGame(5,  5, [(0, 4), (4, 0)])
+        result = game.dig(2, 3)
+        expected = 23
+        state = 'victory'
+        view = [[' ', ' ', ' ', '1', '_'],
+                [' ', ' ', ' ', '1', '1'],
+                [' ', ' ', ' ', ' ', ' '],
+                ['1', '1', ' ', ' ', ' '],
+                ['_', '1', ' ', ' ', ' ']]
+        self.assertEqual(result, expected)
+        self.assertEqual(game.state, state)
+        self.assertEqual(game.render(), view)
+
+    def test_09(self):
+        # test dig() if open a cell, which is already
+        game = game_from_dict({'dimensions': [2, 2],
+                               'state': 'ongoing',
+                               'mask': [[False, True],
+                                        [False, True]],
+                               'board': [[1,   1],
+                                         ['.', 1]]})
+        result = game.dig(0, 1)
+        expected = 0
+        state = 'ongoing'
+        view = [['_', '1'],
+                ['_', '1']]
+        self.assertEqual(result, expected)
+        self.assertEqual(game.state, state)
+        self.assertEqual(game.render(), view)
 
 
 def game_from_dict(d):

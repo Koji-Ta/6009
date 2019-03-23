@@ -28,54 +28,35 @@ class MinesGame:
         """
         self.dimensions = [num_rows, num_cols]
         self.state = "ongoing"
-        self.mask = [[False] * num_cols] * num_rows
-        self.board = [[0] * num_cols] * num_rows
-        for x in range(num_rows):
-            for y in range(num_cols):
-                if [x,y] in bombs or (x,y) in bombs:
-                    self.board[x][y] = '.'
+        self.mask = [[False] * num_cols for _ in range(num_rows)]
+        # initial board
+        self.board = [[0] * num_cols for _ in range(num_rows)]
+        # set bombs
+        for row, column in bombs:
+            self.board[row][column] = '.'
+        # compute number of adjacent bombs
         for r in range(num_rows):
             for c in range(num_cols):
-                if self.board[r][c] == 0:
-                    neighbor_bombs = 0
-                    if 0 <= r-1 < num_rows:
-                        if 0 <= c-1 < num_cols:
-                            if self.board[r-1][c-1] == '.':
-                                neighbor_bombs += 1
-                    if 0 <= r < num_rows:
-                        if 0 <= c-1 < num_cols:
-                            if self.board[r][c-1] == '.':
-                                neighbor_bombs += 1
-                    if 0 <= r+1 < num_rows:
-                        if 0 <= c-1 < num_cols:
-                            if self.board[r+1][c-1] == '.':
-                                neighbor_bombs += 1
-                    if 0 <= r-1 < num_rows:
-                        if 0 <= c < num_cols:
-                            if self.board[r-1][c] == '.':
-                                neighbor_bombs += 1
-                    if 0 <= r < num_rows:
-                        if 0 <= c < num_cols:
-                            if self.board[r][c] == '.':
-                                neighbor_bombs += 1
-                    if 0 <= r+1 < num_rows:
-                        if 0 <= c < num_cols:
-                            if self.board[r+1][c] == '.':
-                                neighbor_bombs += 1
-                    if 0 <= r-1 < num_rows:
-                        if 0 <= c+1 < num_cols:
-                            if self.board[r-1][c+1] == '.':
-                                neighbor_bombs += 1
-                    if 0 <= r < num_rows:
-                        if 0 <= c+1 < num_cols:
-                            if self.board[r][c+1] == '.':
-                                neighbor_bombs += 1
-                    if 0 <= r+1 < num_rows:
-                        if 0 <= c+1 < num_cols:
-                            if self.board[r+1][c+1] == '.':
-                                neighbor_bombs += 1
-                    self.board[r][c] = neighbor_bombs
+                if self.board[r][c] != '.':
+                    self.board[r][c] = self._adjacent_bombs(r, c)
 
+    def _adjacent_bombs(self, row, column):
+        """Compute number of adjacent bombs for the given cell"""
+        return sum(self.board[r][c] == '.'
+                   for r, c in self._get_zone(row, column))
+
+    def _get_zone(self, row, column):
+        """Return list of cell coordinate for square 3x3 with center in (row, column)"""
+        rows, columns = self.dimensions
+        return [(r, c) for r in range(self._strip(row-1, rows),
+                                      self._strip(row+1, rows)+1)
+                       for c in range(self._strip(column-1, columns),
+                                      self._strip(column+1, columns)+1)]
+
+    @staticmethod
+    def _strip(val, val_max):
+        """Bound value between 0 and val_max-1"""
+        return min(val_max-1, max(0, val))
 
     def dump(self):
         """Print a human-readable representation of this game.
@@ -149,57 +130,41 @@ class MinesGame:
                [False, False, False, False]
         state: defeat
         """
-        state = self.state
-        if state == "defeat" or state == "victory":
-            self.state = state
-            return 1
+        if self.state == "defeat" \
+                or self.state == "victory" \
+                or self.mask[row][col]:
+            return 0
 
         if self.board[row][col] == '.':
             self.mask[row][col] = True
             self.state = "defeat"
             return 1
 
-        coord1 = [row - 1, col - 1]
-        coord2 = [row - 1, col]
-        coord3 = [row - 1, col + 1]
+        result = self._open(row, col)
+        if self._is_victory():
+            self.state = 'victory'
+        return result
 
-        coord4 = [row, col - 1]
-        coord5 = [row, col + 1]
+    def _open(self, row, col):
+        """Open cells and return number of them"""
+        viewed = set()
 
-        coord6 = [row + 1, col - 1]
-        coord7 = [row + 1, col]
-        coord8 = [row + 1, col + 1]
+        def rec_open(row, col):
+            """Recursively open cells"""
+            self.mask[row][col] = True
+            viewed.add((row, col))
+            if self.board[row][col] != 0:
+                return 1
+            return 1 + sum(rec_open(r, c)
+                           for r, c in self._get_zone(row, col)
+                           if (r, c) not in viewed)
+        return rec_open(row, col)
 
-        self.mask[row][col] = True
-
-        count = 0
-        for coord in [coord1, coord2, coord3, coord4,
-                      coord5, coord6, coord7, coord8]:
-            if coord[0] >= 0:
-                if coord[0] < self.height:
-                    if cooef[1] >= 0:
-                        if coord[1] < self.width:
-                            count += 1
-                            self.mask[coord[0], coord[1]] = True
-
-        bombs = 0
-        covered_squares = 0
-        for r in range(self.dimensions[0]):
-            for c in range(self.dimensions[1]):
-                if self.board[r][c] == ".":
-                    if  self.mask[r][c] == True:
-                        bombs += 1
-                elif self.mask[r][c] == False:
-                    covered_squares += 1
-        if bombs != 0:
-            self.state = "defeat"
-            return 0
-        elif covered_squares == 0:
-            self.state = "victory"
-            return 0
-        else:
-            return count
-
+    def _is_victory(self):
+        """True if victory game"""
+        close = sum(not visible for row in self.mask for visible in row)
+        bombs = sum(cell == '.' for row in self.board for cell in row)
+        return bombs == close
 
     def render(self, xray=False):
         """Prepare a game for display.
